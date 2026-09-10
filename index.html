@@ -1,1 +1,516 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Presensi PJJ Bahasa Indonesia</title>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<style>
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background: linear-gradient(135deg, #e0f2fe, #f5f3ff);
+  color: #1e293b;
+}
+
+.container {
+  max-width: 650px;
+  margin: 40px auto;
+  padding: 20px;
+}
+
+.card {
+  background: white;
+  border-radius: 22px;
+  padding: 30px;
+  box-shadow: 0 10px 30px rgba(0,0,0,.10);
+}
+
+.header {
+  text-align: center;
+  margin-bottom: 25px;
+}
+
+.header h1 {
+  margin-bottom: 8px;
+  color: #1d4ed8;
+}
+
+.header p {
+  margin: 5px;
+}
+
+.info {
+  background: #eff6ff;
+  border-radius: 15px;
+  padding: 15px;
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+label {
+  display: block;
+  font-weight: bold;
+  margin-bottom: 8px;
+}
+
+select,
+input {
+  width: 100%;
+  padding: 13px;
+  border: 1px solid #cbd5e1;
+  border-radius: 10px;
+  font-size: 16px;
+  margin-bottom: 15px;
+}
+
+button {
+  width: 100%;
+  padding: 14px;
+  border: none;
+  border-radius: 12px;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+  margin-top: 5px;
+}
+
+.hadir {
+  background: #2563eb;
+  color: white;
+}
+
+.hadir:hover {
+  background: #1d4ed8;
+}
+
+.guru {
+  background: #475569;
+  color: white;
+  margin-top: 25px;
+}
+
+.message {
+  margin-top: 18px;
+  padding: 14px;
+  border-radius: 10px;
+  display: none;
+  text-align: center;
+  font-weight: bold;
+}
+
+.success {
+  display: block;
+  background: #dcfce7;
+  color: #166534;
+}
+
+.error {
+  display: block;
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+#teacherPanel {
+  display: none;
+  margin-top: 25px;
+}
+
+.table-wrap {
+  overflow-x: auto;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 15px;
+  font-size: 14px;
+}
+
+th,
+td {
+  border: 1px solid #cbd5e1;
+  padding: 9px;
+  text-align: left;
+}
+
+th {
+  background: #dbeafe;
+}
+
+.badge-hadir {
+  color: #166534;
+  font-weight: bold;
+}
+
+.badge-belum {
+  color: #991b1b;
+  font-weight: bold;
+}
+
+.footer {
+  text-align: center;
+  margin-top: 20px;
+  font-size: 13px;
+  color: #64748b;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+  <div class="card">
+
+    <div class="header">
+      <h1>📚 PRESENSI PJJ</h1>
+      <h2>Bahasa Indonesia</h2>
+      <p>Jumat, 11 September 2026</p>
+    </div>
+
+    <div class="info">
+      ⏰ <strong>Waktu Presensi</strong><br>
+      07.30 – 08.30 WIB
+    </div>
+
+    <label for="nama">Nama Murid</label>
+
+    <select id="nama">
+      <option value="">-- Pilih Nama Murid --</option>
+    </select>
+
+    <button class="hadir" onclick="presensi()">
+      ✅ HADIR
+    </button>
+
+    <div id="message" class="message"></div>
+
+    <button class="guru" onclick="bukaGuru()">
+      🔐 Akses Rekap Guru
+    </button>
+
+    <div id="teacherPanel">
+
+      <h3>📋 Rekap Presensi Guru</h3>
+
+      <button class="hadir" onclick="lihatRekap()">
+        🔄 Tampilkan Rekap
+      </button>
+
+      <div id="rekapMessage" class="message"></div>
+
+      <div class="table-wrap">
+        <table id="tabelRekap">
+          <thead>
+            <tr>
+              <th>No.</th>
+              <th>Nama Murid</th>
+              <th>Status</th>
+              <th>Waktu</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+
+    </div>
+
+    <div class="footer">
+      Sistem Presensi PJJ Bahasa Indonesia
+    </div>
+
+  </div>
+</div>
+
+<script>
+
+// =====================================================
+// SUPABASE
+// =====================================================
+
+const SUPABASE_URL =
+  "https://azonfhbcyhfspfyufvch.supabase.co";
+
+const SUPABASE_PUBLISHABLE_KEY =
+  "sb_publishable_V44mFwD8K1xQtWqAxa0-tg_17vbvk3v";
+
+const supabaseClient =
+  supabase.createClient(
+    SUPABASE_URL,
+    SUPABASE_PUBLISHABLE_KEY
+  );
+
+
+// =====================================================
+// DAFTAR 31 MURID
+// =====================================================
+
+const daftarNama = [
+  "Adhid Firmansyah",
+  "Airin Novita Sari",
+  "Alif Rama Dhani",
+  "Alja SKD",
+  "Arya Ardinata",
+  "Asyifa Fatiyah Riski",
+  "Ayu Rahimah",
+  "Dara Latasya",
+  "Dimas Setiawan",
+  "Fadhil Abdillah",
+  "Fadly Ferdiansyah",
+  "Faiz Abdul Ghani",
+  "Galang Ibnu Arahman",
+  "Hafiz Rizky Pratama Saputra",
+  "Idayah Laisya Kamis Lihi",
+  "Indri Yani",
+  "Nabila Anggraini",
+  "Nuri Az-Zahra",
+  "Nurul Agustin",
+  "Mufazal Alvaro",
+  "Rahesya Ramadan",
+  "Randa Widiansyah",
+  "Ridho Syabandi",
+  "Risti Istiaroh",
+  "Salfahdri Pribadi",
+  "Shawitri Rhohillah",
+  "Siffa Putri Anggriyani",
+  "Suci Rahma Fajaria",
+  "Syafitri",
+  "Syarif Ahmad Fadilla",
+  "Willyandri Tampubolon"
+];
+
+
+// =====================================================
+// MEMASUKKAN NAMA KE DROPDOWN
+// =====================================================
+
+const selectNama = document.getElementById("nama");
+
+daftarNama.forEach(function(nama) {
+
+  const option = document.createElement("option");
+
+  option.value = nama;
+  option.textContent = nama;
+
+  selectNama.appendChild(option);
+
+});
+
+
+// =====================================================
+// PESAN
+// =====================================================
+
+function tampilPesan(teks, tipe) {
+
+  const box = document.getElementById("message");
+
+  box.textContent = teks;
+
+  box.className = "message " + tipe;
+
+}
+
+
+// =====================================================
+// PRESENSI MURID
+// =====================================================
+
+async function presensi() {
+
+  const nama = document.getElementById("nama").value;
+
+  if (!nama) {
+
+    tampilPesan(
+      "Silakan pilih nama terlebih dahulu.",
+      "error"
+    );
+
+    return;
+  }
+
+  tampilPesan(
+    "Sedang mencatat presensi...",
+    "success"
+  );
+
+  const { data, error } =
+    await supabaseClient.rpc(
+      "record_attendance",
+      {
+        p_name: nama
+      }
+    );
+
+  if (error) {
+
+    tampilPesan(
+      error.message,
+      "error"
+    );
+
+    return;
+  }
+
+  tampilPesan(
+    "✅ Presensi berhasil! " +
+    nama +
+    " telah tercatat hadir.",
+    "success"
+  );
+
+}
+
+
+// =====================================================
+// AKSES GURU
+// =====================================================
+
+function bukaGuru() {
+
+  const password =
+    prompt("Masukkan password guru:");
+
+  if (password === null) {
+    return;
+  }
+
+  lihatRekapDenganPassword(password);
+
+}
+
+
+// =====================================================
+// REKAP GURU
+// =====================================================
+
+let passwordGuru = "";
+
+async function lihatRekapDenganPassword(password) {
+
+  passwordGuru = password;
+
+  const { data, error } =
+    await supabaseClient.rpc(
+      "teacher_recap",
+      {
+        p_password: password
+      }
+    );
+
+  if (error) {
+
+    alert(
+      "Password salah atau terjadi kesalahan."
+    );
+
+    return;
+  }
+
+  document.getElementById(
+    "teacherPanel"
+  ).style.display = "block";
+
+  tampilkanRekap(data);
+
+}
+
+
+// =====================================================
+// TOMBOL TAMPILKAN REKAP
+// =====================================================
+
+async function lihatRekap() {
+
+  if (!passwordGuru) {
+    bukaGuru();
+    return;
+  }
+
+  const { data, error } =
+    await supabaseClient.rpc(
+      "teacher_recap",
+      {
+        p_password: passwordGuru
+      }
+    );
+
+  if (error) {
+
+    document.getElementById(
+      "rekapMessage"
+    ).textContent =
+      "Gagal mengambil rekap.";
+
+    return;
+  }
+
+  tampilkanRekap(data);
+
+}
+
+
+// =====================================================
+// MENAMPILKAN REKAP
+// =====================================================
+
+function tampilkanRekap(data) {
+
+  const tbody =
+    document.querySelector(
+      "#tabelRekap tbody"
+    );
+
+  tbody.innerHTML = "";
+
+  if (!data || data.length === 0) {
+
+    const row =
+      document.createElement("tr");
+
+    row.innerHTML =
+      '<td colspan="4" style="text-align:center;">Belum ada data presensi.</td>';
+
+    tbody.appendChild(row);
+
+    return;
+  }
+
+  data.forEach(function(item, index) {
+
+    const row =
+      document.createElement("tr");
+
+    const status =
+      item.attendance_time
+        ? '<span class="badge-hadir">HADIR</span>'
+        : '<span class="badge-belum">BELUM HADIR</span>';
+
+    const waktu =
+      item.attendance_time || "-";
+
+    row.innerHTML = `
+      <td>${index + 1}</td>
+      <td>${item.name}</td>
+      <td>${status}</td>
+      <td>${waktu}</td>
+    `;
+
+    tbody.appendChild(row);
+
+  });
+
+}
+
+</script>
+
+</body>
+</html>
