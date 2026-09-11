@@ -408,26 +408,24 @@ async function lihatRekapDenganPassword(password) {
 
   if (error) {
 
+    console.error("ERROR REKAP:", error);
+
     alert(
-      "Password salah atau terjadi kesalahan."
+      "Terjadi kesalahan:\n\n" +
+      error.message
     );
 
     return;
   }
 
-  // Simpan password setelah berhasil
   passwordGuru = password;
 
-  // BUKA PANEL GURU
   document.getElementById(
     "teacherPanel"
   ).style.display = "block";
 
-  // Tampilkan rekap
   tampilkanRekap(data);
-
 }
-
 // =====================================================
 // TOMBOL TAMPILKAN REKAP
 // =====================================================
