@@ -490,16 +490,16 @@ function tampilkanRekap(data) {
       document.createElement("tr");
 
     const status =
-      item.attendance_time
+      item.status === "HADIR"
         ? '<span class="badge-hadir">HADIR</span>'
         : '<span class="badge-belum">BELUM HADIR</span>';
 
     const waktu =
-      item.attendance_time || "-";
+      item.waktu || "-";
 
     row.innerHTML = `
       <td>${index + 1}</td>
-      <td>${item.name}</td>
+      <td>${item.nama}</td>
       <td>${status}</td>
       <td>${waktu}</td>
     `;
@@ -509,8 +509,3 @@ function tampilkanRekap(data) {
   });
 
 }
-
-</script>
-
-</body>
-</html>
