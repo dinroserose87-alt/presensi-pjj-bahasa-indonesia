@@ -376,18 +376,18 @@ async function presensi() {
 // AKSES GURU
 // =====================================================
 // PERBAIKAN AKSES GURU
+// AKSES GURU
 function bukaGuru() {
+    alert("Tombol Akses Rekap Guru berfungsi.");
+    
+    const password = prompt("Masukkan password guru:");
 
-  const password =
-    prompt("Masukkan password guru:");
+    if (password === null || password.trim() === "") {
+        return;
+    }
 
-  if (password === null || password.trim() === "") {
-    return;
-  }
-
-  lihatRekapDenganPassword(password);
+    lihatRekapDenganPassword(password);
 }
-
 
 // =====================================================
 // =====================================================
