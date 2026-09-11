@@ -371,6 +371,8 @@ async function presensi() {
 
 
 // =====================================================
+
+// =====================================================
 // AKSES GURU
 // =====================================================
 
@@ -379,7 +381,7 @@ function bukaGuru() {
   const password =
     prompt("Masukkan password guru:");
 
-  if (password === null) {
+  if (password === null || password.trim() === "") {
     return;
   }
 
@@ -389,14 +391,13 @@ function bukaGuru() {
 
 
 // =====================================================
+// =====================================================
 // REKAP GURU
 // =====================================================
 
 let passwordGuru = "";
 
 async function lihatRekapDenganPassword(password) {
-
-  passwordGuru = password;
 
   const { data, error } =
     await supabaseClient.rpc(
@@ -415,14 +416,18 @@ async function lihatRekapDenganPassword(password) {
     return;
   }
 
+  // Simpan password setelah berhasil
+  passwordGuru = password;
+
+  // BUKA PANEL GURU
   document.getElementById(
     "teacherPanel"
   ).style.display = "block";
 
+  // Tampilkan rekap
   tampilkanRekap(data);
 
 }
-
 
 // =====================================================
 // TOMBOL TAMPILKAN REKAP
@@ -456,8 +461,6 @@ async function lihatRekap() {
   tampilkanRekap(data);
 
 }
-
-
 // =====================================================
 // MENAMPILKAN REKAP
 // =====================================================
